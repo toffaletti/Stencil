@@ -9,8 +9,14 @@ import Spectre
 }
 #endif
 
+fileprivate struct Wallet {
+    let cash: String?
+}
+
 fileprivate struct Person {
   let name: String
+  let nickname: String?
+  let wallet: Wallet?
 }
 
 fileprivate struct Article {
@@ -26,7 +32,7 @@ func testVariable() {
       "profiles": [
         "github": "kylef",
       ],
-      "article": Article(author: Person(name: "Kyle"))
+      "article": Article(author: Person(name: "Kyle", nickname: "Ky", wallet: Wallet(cash: "Money")))
     ])
 
 #if os(OSX)
@@ -106,6 +112,20 @@ func testVariable() {
       let result = try variable.resolve(context) as? String
       try expect(result) == "Kyle"
     }
+
+    $0.it("can resolve an optional property with reflection") {
+      let variable = Variable("article.author.nickname")
+      let result = try variable.resolve(context) as? String
+      try expect(result) == "Ky"
+    }
+
+    $0.it("can resolve nested optional property with reflection") {
+      let variable = Variable("article.author.wallet.cash")
+      let result = try variable.resolve(context) as? String 
+      try expect(result) == "Money"
+    }
+
+
 
 #if os(OSX)
     $0.it("can resolve a value via KVO") {

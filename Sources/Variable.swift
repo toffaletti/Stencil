@@ -41,6 +41,13 @@ class FilterExpression : Resolvable {
   }
 }
 
+func unwrap<T: Any>(any: T) -> T? {
+  let mirror = Mirror(reflecting: any)
+  guard mirror.displayStyle == .optional else { return any }
+  guard let child = mirror.children.first else { return nil }
+  return unwrap(any: child.value) as? T
+}
+
 /// A structure used to represent a template variable, and to resolve it in a given context.
 public struct Variable : Equatable, Resolvable {
   public let variable: String
@@ -98,10 +105,10 @@ public struct Variable : Equatable, Resolvable {
       } else if let value = current {
         let mirror = Mirror(reflecting: value)
         current = mirror.descendant(bit)
-
         if current == nil {
           return nil
         }
+		current = unwrap(any: current!)
       } else {
         return nil
       }
